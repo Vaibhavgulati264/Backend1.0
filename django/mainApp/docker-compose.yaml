@@ -1,0 +1,47 @@
+version: '3'
+
+
+services:
+  backend:
+    image: vaibhav655/django-backend 
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    container_name: backend_app
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - .:/backend_app
+    ports:
+      - "8000:8000"
+    networks:
+      - data-net
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    # volumes:
+    #   - ./db_init.sql:/docker-entrypoint-initdb.d/rarible_init.sql
+    ports:
+      - 5431:5432
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+    networks:
+      - data-net
+
+networks:
+  data-net:
+    driver: bridge
+    # name: data-net
+    external: false
